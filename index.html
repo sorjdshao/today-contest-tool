@@ -1,225 +1,173 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"/>
-<title>ピーキング戦略完全版</title>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<style>
+  <meta charset="utf-8">
+  <title>ピーキング戦略（大会当日）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
     body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
     .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 900px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     label { display: block; margin-top: 10px; font-weight: bold; }
     input, select { width: 100%; padding: 8px; margin-top: 5px; }
     button { margin-top: 20px; padding: 10px; font-size: 1em; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th[title] { cursor: help; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
     th { background-color: #eee; }
     @media print {
-      body { -webkit-print-color-adjust: exact; }
-      table { page-break-inside: avoid; }
+      button { display: none; }
     }
-    #adjustSummary { margin-top: 20px; padding: 10px; background: #e7f3fe; border-left: 5px solid #2196F3; }
-    #output { margin-top: 20px; }
-    button:hover { background: #45a049; }
-    h2 { color: #333; margin-top: 40px; }
-    @media (max-width: 600px) {
-      input, select, button { font-size: 1em; }
-      h1 { font-size: 1.5em; }
-    }
-    .input-error {
-      border: 2px solid red !important;
-    }
-</style>
+  </style>
 </head>
 <body>
 <div class="container">
-<h1>ピーキング戦略完全版</h1>
-<button onclick="window.print()">PDFとして保存 / 印刷</button>
+  <h1>ピーキング戦略（大会当日）</h1>
 
-<label>体重（kg）</label>
-<input id="weight" placeholder="例：70" type="number" min="30" max="200"/>
+  <label>体重（kg）</label>
+  <input id="weight" type="number" placeholder="例：70" />
 
-<label>TDEE（1日の消費カロリー）</label>
-<input id="tdee" oninput="updatePFCfromTDEE()" placeholder="例：2500" type="number"/>
+  <label>体脂肪率（％）</label>
+  <input id="bodyfat" type="number" placeholder="例：10" />
 
-<label>体脂肪率（％）</label>
-<input id="bodyfat" placeholder="例：15" type="number"/>
+  <label>TDEE（1日の消費カロリー）</label>
+  <input id="tdee" type="number" placeholder="例：2400" />
 
-<label>ピーキング期間</label>
-<select id="days">
-  <option value="0">ピーキングなし</option>
-  <option value="3">3日間</option>
-  <option value="5">5日間</option>
-  <option selected value="7">7日間</option>
-  <option value="10">10日間</option>
-</select>
+  <label>起床時間</label>
+  <input id="wakeTime" type="time" />
 
-<label>水分感受性</label>
-<select id="waterSensitivity">
-  <option value="low">低</option>
-  <option selected value="medium">中</option>
-  <option value="high">高</option>
-</select>
+  <label>ステージ数</label>
+  <select id="stageCount">
+    <option value="1">1ステージ</option>
+    <option value="2">2ステージ</option>
+    <option value="3">3ステージ</option>
+  </select>
 
-<label>塩分感受性</label>
-<select id="saltSensitivity">
-  <option value="low">低</option>
-  <option selected value="medium">中</option>
-  <option value="high">高</option>
-</select>
+  <label>ステージ1の時間</label>
+  <input id="stageTime1" type="time" />
 
-<label>カーボ感受性</label>
-<select id="carbSensitivity">
-  <option value="low">低</option>
-  <option selected value="medium">中</option>
-  <option value="high">高</option>
-</select>
+  <label>ステージ2の時間</label>
+  <input id="stageTime2" type="time" />
 
-<h2>1日のPFC目標（g）</h2>
-<label>タンパク質（P）</label>
-<label>食事回数（回）</label>
-<select id="mealCount">
-  <option value="3">3回</option>
-  <option value="4">4回</option>
-  <option selected value="5">5回</option>
-  <option value="6">6回</option>
-</select>
-<input id="protein" placeholder="例：150" type="number"/>
-<label>脂質（F）</label>
-<input id="fat" placeholder="例：50" type="number"/>
-<label>炭水化物（C）</label>
-<input id="carb" placeholder="例：250" type="number"/>
+  <label>ステージ3の時間</label>
+  <input id="stageTime3" type="time" />
 
-<button onclick="generateMealPlan()">戦略を表示</button>
-<div id="mealPlanError" style="color: red; margin-top: 10px;"></div>
+  <label>パンプアップ開始時間（ステージの◯分前）</label>
+  <input id="pumpMinutes" type="number" placeholder="例：30" />
 
-<div id="mealPlanOutput">
-  <h2>当日の食事タイミングと内容</h2>
-  <table id="mealPlanTable">
-    <thead>
-      <tr><th>時間</th><th>内容</th><th>P</th><th>F</th><th>C</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+  <label>食事間隔（分）</label>
+  <input id="mealInterval" type="number" placeholder="例：120" />
 
-<div id="adjustSummary"></div>
-<div id="output"></div>
-<div id="timelineOutput"></div>
+  <label>当日の総摂取カロリー</label>
+  <input id="todayCalories" type="number" placeholder="例：2200" />
 
-<div id="timeScheduleSection">
-<h2>大会当日のタイムスケジュール</h2>
-<label>起床時間</label><input id="wakeTime" type="time"/>
-<label>朝食時間</label><input id="breakfastTime" type="time"/>
-<label>ステージ開始時間</label><input id="stageTime" type="time"/>
-<label>パンプアップ開始時間</label><input id="pumpTime" type="time"/>
-</div>
+  <label>水分感受性</label>
+  <select id="waterSensitivity">
+    <option value="low">低</option>
+    <option value="medium" selected>中</option>
+    <option value="high">高</option>
+  </select>
+
+  <label>塩分感受性</label>
+  <select id="saltSensitivity">
+    <option value="low">低</option>
+    <option value="medium" selected>中</option>
+    <option value="high">高</option>
+  </select>
+
+  <label>炭水化物の配分戦略</label>
+  <select id="carbTiming">
+    <option value="even">均等に配分</option>
+    <option value="front">前半に多め</option>
+    <option value="back" selected>後半に多め</option>
+  </select>
+
+  <button onclick="generateCompetitionDayPlan()">当日スケジュールを表示</button>
+
+  <div id="output"></div>
 </div>
 
 <script>
-function updatePFCfromTDEE() {
-  const tdee = parseFloat(document.getElementById("tdee").value);
-  if (!tdee) return;
-  const pCal = tdee * 0.3;
-  const fCal = tdee * 0.25;
-  const cCal = tdee * 0.45;
-  document.getElementById("protein").value = Math.round(pCal / 4);
-  document.getElementById("fat").value = Math.round(fCal / 9);
-  document.getElementById("carb").value = Math.round(cCal / 4);
-}
-
-function generateMealPlan() {
-  const ids = ["weight", "protein", "fat", "carb", "wakeTime", "pumpTime", "stageTime", "mealCount"];
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove("input-error");
-  });
-
+function generateCompetitionDayPlan() {
   const weight = parseFloat(document.getElementById("weight").value);
-  const protein = parseInt(document.getElementById("protein").value);
-  const fat = parseInt(document.getElementById("fat").value);
-  const carb = parseInt(document.getElementById("carb").value);
-  const meals = parseInt(document.getElementById("mealCount").value);
-  const wake = document.getElementById("wakeTime").value;
-  const pump = document.getElementById("pumpTime").value;
-  const stage = document.getElementById("stageTime").value;
-  const breakfast = document.getElementById("breakfastTime").value;
+  const bodyfat = parseFloat(document.getElementById("bodyfat").value);
+  const tdee = parseFloat(document.getElementById("tdee").value);
+  const wakeTime = document.getElementById("wakeTime").value;
+  const stageCount = parseInt(document.getElementById("stageCount").value);
+  const stageTime1 = document.getElementById("stageTime1").value;
+  const stageTime2 = document.getElementById("stageTime2").value;
+  const stageTime3 = document.getElementById("stageTime3").value;
+  const pumpMinutes = parseInt(document.getElementById("pumpMinutes").value);
+  const mealInterval = parseInt(document.getElementById("mealInterval").value);
+  const todayCalories = parseInt(document.getElementById("todayCalories").value);
+  const waterSensitivity = document.getElementById("waterSensitivity").value;
+  const saltSensitivity = document.getElementById("saltSensitivity").value;
+  const carbTiming = document.getElementById("carbTiming").value;
 
-  const missing = [];
-  if (!weight) { missing.push("体重"); document.getElementById("weight").classList.add("input-error"); }
-  if (!protein || !fat || !carb) { missing.push("PFC値を正しく入力してください"); }
-  if (!wake) { missing.push("起床時間"); document.getElementById("wakeTime").classList.add("input-error"); }
-  if (!pump) { document.getElementById("pumpTime").classList.add("input-error"); }
-  if (!stage) { missing.push("ステージ時間"); document.getElementById("stageTime").classList.add("input-error"); }
-  if (isNaN(meals)) { missing.push("食事回数"); document.getElementById("mealCount").classList.add("input-error"); }
+  const leanWeight = weight * (1 - bodyfat / 100);
+  const baseProtein = Math.round(leanWeight * 2.3);
+  const baseFat = 30;
+  const proteinKcal = baseProtein * 4;
+  const fatKcal = baseFat * 9;
+  const carbKcal = todayCalories - proteinKcal - fatKcal;
+  const totalCarb = Math.round(carbKcal / 4);
 
-  if (weight < 30 || weight > 200) {
-    missing.push("体重（30〜200kgの間で入力）");
-    document.getElementById("weight").classList.add("input-error");
+  const mealCount = Math.floor((12 * 60) / mealInterval);
+  const pMeal = Math.round(baseProtein / mealCount);
+  const fMeal = Math.round(baseFat / mealCount);
+
+  let carbWeights = [];
+  for (let i = 0; i < mealCount; i++) {
+    if (carbTiming === "even") carbWeights.push(1);
+    else if (carbTiming === "front") carbWeights.push(i < mealCount / 2 ? 1.2 : 0.8);
+    else carbWeights.push(i < mealCount / 2 ? 0.8 : 1.2);
+  }
+  const totalWeight = carbWeights.reduce((a, b) => a + b, 0);
+  const cMeals = carbWeights.map(w => Math.round((totalCarb * w) / totalWeight));
+
+  const adjust = (val, sens) => {
+    const factor = { low: 1.2, medium: 1.0, high: 0.8 };
+    return (val * factor[sens]).toFixed(1);
+  };
+  const water = adjust(Math.max(weight * 0.05, 1.5), waterSensitivity);
+  const salt = Math.round(adjust(Math.max(weight * 0.1, 2), saltSensitivity));
+
+  const [wakeH, wakeM] = wakeTime.split(":").map(Number);
+  const startTime = new Date(0, 0, 0, wakeH, wakeM);
+  const output = document.getElementById("output");
+  output.innerHTML = "<h3>大会当日スケジュール</h3>";
+  output.innerHTML += `<p>総カロリー: ${todayCalories} kcal / 水分: ${water} L / 塩分: ${salt} g</p>`;
+  output.innerHTML += "<table><thead><tr><th>時間</th><th>内容</th><th>P</th><th>F</th><th>C</th></tr></thead><tbody>";
+
+  for (let i = 0; i < mealCount; i++) {
+    const timeStr = startTime.toTimeString().slice(0, 5);
+    output.innerHTML += `<tr><td>${timeStr}</td><td>食事${i + 1}</td><td>${pMeal}g</td><td>${fMeal}g</td><td>${cMeals[i]}g</td></tr>`;
+    startTime.setMinutes(startTime.getMinutes() + mealInterval);
   }
 
-  if (wake && stage) {
-    const wakeTime = new Date(`1970-01-01T${wake}`);
-    const stageTime = new Date(`1970-01-01T${stage}`);
-    if (wakeTime >= stageTime) {
-      missing.push("起床時間はステージ時間より前に設定してください");
-      document.getElementById("wakeTime").classList.add("input-error");
-      document.getElementById("stageTime").classList.add("input-error");
-    }
+  if (stageTime1) {
+    const [sh, sm] = stageTime1.split(":").map(Number);
+    const pump1 = new Date(0, 0, 0, sh, sm);
+    pump1.setMinutes(pump1.getMinutes() - pumpMinutes);
+    output.innerHTML += `<tr><td>${pump1.toTimeString().slice(0, 5)}</td><td>パンプアップ1</td><td>-</td><td>-</td><td>-</td></tr>`;
+    output.innerHTML += `<tr><td>${stageTime1}</td><td>ステージ1</td><td>-</td><td>-</td><td>-</td></tr>`;
   }
 
-  if (missing.length > 0) {
-    document.getElementById("mealPlanError").innerText = "以下の項目を入力してください：" + missing.join("、");
-    document.getElementById("mealPlanTable").querySelector("tbody").innerHTML = "";
-    return;
+  if ((stageCount === 2 || stageCount === 3) && stageTime2) {
+    const [sh2, sm2] = stageTime2.split(":").map(Number);
+    const pump2 = new Date(0, 0, 0, sh2, sm2);
+    pump2.setMinutes(pump2.getMinutes() - pumpMinutes);
+    output.innerHTML += `<tr><td>${pump2.toTimeString().slice(0, 5)}</td><td>パンプアップ2</td><td>-</td><td>-</td><td>-</td></tr>`;
+    output.innerHTML += `<tr><td>${stageTime2}</td><td>ステージ2</td><td>-</td><td>-</td><td>-</td></tr>`;
   }
 
-  document.getElementById("mealPlanError").innerText = "";
-
-  const [startH, startM] = wake.split(":").map(Number);
-  const [stageH, stageM] = stage.split(":").map(Number);
-  let [pumpH, pumpM] = pump ? pump.split(":").map(Number) : [null, null];
-
-  let pumpTime;
-  if (!pumpH || !pumpM) {
-    const stageDate = new Date(0, 0, 0, stageH, stageM);
-    stageDate.setMinutes(stageDate.getMinutes() - 60);
-    const formatted = stageDate.toTimeString().slice(0, 5);
-    document.getElementById("pumpTime").value = formatted;
-    [pumpH, pumpM] = formatted.split(":").map(Number);
-  }
-  pumpTime = new Date(0, 0, 0, pumpH, pumpM);
-
-  const startTime = new Date(0, 0, 0, startH, startM);
-  const mealDuration = (pumpTime - startTime) / 60000;
-  const interval = Math.floor(mealDuration / (meals - 2));
-  const tbody = document.getElementById("mealPlanTable").querySelector("tbody");
-  tbody.innerHTML = "";
-
-  if (breakfast) {
-    tbody.innerHTML += `<tr><td>${breakfast}</td><td>朝食</td><td>-</td><td>-</td><td>-</td></tr>`;
+  if (stageCount === 3 && stageTime3) {
+    const [sh3, sm3] = stageTime3.split(":").map(Number);
+    const pump3 = new Date(0, 0, 0, sh3, sm3);
+    pump3.setMinutes(pump3.getMinutes() - pumpMinutes);
+    output.innerHTML += `<tr><td>${pump3.toTimeString().slice(0, 5)}</td><td>パンプアップ3</td><td>-</td><td>-</td><td>-</td></tr>`;
+    output.innerHTML += `<tr><td>${stageTime3}</td><td>ステージ3</td><td>-</td><td>-</td><td>-</td></tr>`;
   }
 
-  const pShare = Math.round(protein / meals);
-  const fShare = Math.round(fat / meals);
-  const cShare = Math.round(carb / meals);
-
-  let current = new Date(startTime);
-  for (let i = 0; i < meals - 2; i++) {
-    const timeStr = current.toTimeString().slice(0, 5);
-    tbody.innerHTML += `<tr><td>${timeStr}</td><td>通常食</td><td>${pShare}g</td><td>${fShare}g</td><td>${cShare}g</td></tr>`;
-    current.setMinutes(current.getMinutes() + interval);
-  }
-
-  const carbDose = Math.round(weight * 0.5);
-  const caffeineDose = Math.min(Math.round(weight * 3), 400);
-  const pump30 = new Date(pumpTime.getTime() - 30 * 60000);
-  const pump15 = new Date(pumpTime.getTime() - 15 * 60000);
-
-  tbody.innerHTML += `<tr><td>${pump30.toTimeString().slice(0, 5)}</td><td>パンプ30分前（ジャムパン、塩）</td><td>-</td><td>-</td><td>${carbDose}g</td></tr>`;
-  tbody.innerHTML += `<tr><td>${pump15.toTimeString().slice(0, 5)}</td><td>パンプ15分前（カフェイン${caffeineDose}mg、水）</td><td>-</td><td>-</td><td>-</td></tr>`;
-  tbody.innerHTML += `<tr><td>${pumpTime.toTimeString().slice(0, 5)}</td><td>パンプアップ開始（ステージ約60分前）</td><td>-</td><td>-</td><td>-</td></tr>`;
-  tbody.innerHTML += `<tr><td>${stage}</td><td>ステージ</td><td>-</td><td>-</td><td>-</td></tr>`;
+  output.innerHTML += "</tbody></table>";
 }
 </script>
 </body>
